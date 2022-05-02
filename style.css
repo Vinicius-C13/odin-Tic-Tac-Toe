@@ -1,0 +1,74 @@
+/*-----------------*/
+/*Reset            */
+/*-----------------*/
+
+/*box-sizing*/
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/*margin*/
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+p,
+picture{
+    margin: 0;
+}
+
+/*font-weight*/
+h1,
+h2,
+h3,
+h4,
+h5,
+p{
+    font-weight: 400;
+}
+
+/*body*/
+body{
+    line-height: 1.5;
+    min-height: 100vh;
+    font-family: var(--ff-sans-normal);
+    font-size: var(--fs-300);
+    color: rgb(var(--clr-dark));
+
+    display: grid;
+    grid-template-rows: min-content 1fr;
+}
+
+/*make images easy to work with*/
+img{
+    max-width: 100%;
+    display: block;
+}
+
+/*make form elements easy to work with*/
+input,
+button,
+textarea,
+select{
+    font: inherit;
+}
+/*-----------*/
+/*--General--*/
+/*----------- */
+
+.tab-grid {
+    display: grid;
+    grid-template: repeat(3, 100px)/repeat(3, 100px);
+}
+
+.tab-grid * {
+    border: 3px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 100px;
+}
