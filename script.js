@@ -1,21 +1,13 @@
 let turn = '';
+let xturn = true;
 
 const board = (()=> {  //Primeiro: Preciso fazer isso aqui voltar a funcionar
     const places = Array.from(document.querySelectorAll('.place'));
-    const gameBoard = {board: places};  //Será que dá pra tirar esse objeto? ******
 
-    gameBoard.board.forEach((item)=>{
-        
-        item.addEventListener('click', ()=> {
-            if(item.textContent == ''){
-                controlTurn(item)
-            }else{alert('Campo já preenchido.')}
-        });
+    places.forEach((item)=>{
+        item.addEventListener('click', ()=> controlTurn.changeTurn(item), {once: true});
     });
 
-    const roundPlay = (playLoc, value)=>{
-        playLoc.textContent = value;
-    };
     return {places}
 })();
 
@@ -23,15 +15,18 @@ const board = (()=> {  //Primeiro: Preciso fazer isso aqui voltar a funcionar
 essa pode ser um module - eu acho.*/ 
 //PS: Esse não podia ser um module porque ativava a função play() antes do esperado.
 
-const controlTurn = ((playPlace)=>{
-    if(turn == 0) {
-        oPlayer.play(playPlace)
-        turn = 1;
+const controlTurn = (()=>{
+
+    const changeTurn = (playLoc)=> {
+        if(xturn === true) {
+        xPlayer.play(playLoc);
+        xturn = false;
     }else{
-        xPlayer.play(playPlace)
-        turn = 0;
-    }
-});
+        oPlayer.play(playLoc);
+        xturn = true;
+    }};
+    return {changeTurn}
+})();
 
 /*Acho interessante ter uma factory function "player" que vai definir o valor da jogada do jogador e vai
 adicionar todas as habilidades necessárias a ele*/
