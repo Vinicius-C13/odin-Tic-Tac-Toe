@@ -62,13 +62,31 @@ select{
 /*-----------------*/
 
 :root{
-    --cell-size: 100px;
+    --cell-size: 130px;
     --mark-size: calc(var(--cell-size) * .9)
 }
 
 /*-----------*/
 /*--General--*/
 /*----------- */
+
+header{
+    text-align: center;
+    font-size: 3rem;
+}
+
+main{
+    border-top: 3px solid black;
+    flex-direction: column;
+    padding-block: 5rem;
+}
+
+footer{
+    text-align: center;
+    font-size:1.2rem;
+    font-weight: 900;
+    padding: 1rem;
+}
 
 .board {
     display: grid;
