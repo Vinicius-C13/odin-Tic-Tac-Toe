@@ -1,61 +1,125 @@
-let turn = '';
-let xturn = true;
+//Cache
+let xTurn = true;
+let currentClass = 'x-class';
 
-const board = (()=> {  //Primeiro: Preciso fazer isso aqui voltar a funcionar
-    const places = Array.from(document.querySelectorAll('.place'));
+//Factory Function
+const Player = (name, symbolClass)=>{
+    const play = (cell)=> {
+        cell.classList.add(symbolClass);
+    };
+    const celebration = ()=> {return `${name} wins!`}
+    
+    return{play, celebration}
+};
+const xPlayer = Player('X', 'x-class');
+const oPlayer = Player('O', 'o-class');
 
-    places.forEach((item)=>{
-        item.addEventListener('click', ()=> controlTurn.changeTurn(item), {once: true});
+
+
+//Module to control the board
+const board = (()=> { 
+    const boardCells = Array.from(document.querySelectorAll('.cell'));
+    
+    //All winning combinations
+    const winningCombinations = [
+        [0, 1, 2],
+        [0, 3, 6],
+        [0, 4, 8],
+        [1, 4, 7],
+        [2, 4, 6],
+        [2, 5, 8],
+        [3, 4, 5],
+        [6, 7, 8]
+    ];
+
+    boardCells.forEach((cell)=>{
+    cell.addEventListener('click', ()=>handleClick.makeMove(cell), {once: true});
     });
 
-    return {places}
+    return {boardCells, winningCombinations}
 })();
 
-/*Segundo: Acho interessante ter outra função que controla o flow do jogo para alternar entre os jogadores,
-essa pode ser um module - eu acho.*/ 
-//PS: Esse não podia ser um module porque ativava a função play() antes do esperado.
 
-const controlTurn = (()=>{
+//Module that store all main functions
+const handleClick = (()=>{
+    
+    //Execute the play
+    const makeMove = (cell)=>{
+        if(xTurn){xPlayer.play(cell)}
+        else{oPlayer.play(cell)}
 
-    const changeTurn = (playLoc)=> {
-        if(xturn === true) {
-        xPlayer.play(playLoc);
-        xturn = false;
-    }else{
-        oPlayer.play(playLoc);
-        xturn = true;
-    }};
-    return {changeTurn}
-})();
-
-/*Acho interessante ter uma factory function "player" que vai definir o valor da jogada do jogador e vai
-adicionar todas as habilidades necessárias a ele*/
-
-const Player = (name, symbol)=>{
-    const play = (item)=> {
-        item.textContent = symbol;
+        if(checkWin(currentClass)){
+            endGame('win')
+        } else if (checkDraw()){
+            endGame('draw')
+        } else {
+            changeTurns()
+        };
+        console.log(`${xTurn? "Bola":"Xiss"}`)
     };
-    return{name, play}
-};
 
-const xPlayer = Player('player 1', 'x');
-const oPlayer = Player('player 2', 'o');
+    //Check if someone win
+    const checkWin = (currentClass)=>{
+        return board.winningCombinations.some(combination => {
+            return combination.every(index => {
+                return board.boardCells[index].classList.contains(currentClass)
+            })
+        })
+    }
 
+    //Check if draw
+    const checkDraw = ()=>{
+        return [...board.boardCells].every(cell => {
+            return cell.classList.contains('x-class') || cell.classList.contains('o-class');
+        })
+    }
 
+    //Change the Turns
+    const changeTurns = () => { 
+        xTurn = !xTurn;
+        if(xTurn){
+            currentClass = 'x-class';
+        }
+        else {
+            currentClass = 'o-class';
+        }
+        controlUI.igniteClassChange();
+    };
 
-/*Como eu acho que deve funcionar: A função do tabuleiro tem o eventListener, então, tudo começa por ela.
+    //Finish the game
+    const endGame = (result)=>{
+        if(result == 'win') {
+            controlUI.showEndScreen(`${xTurn ? xPlayer.celebration() : oPlayer.celebration()}`);
+        } else {
+            controlUI.showEndScreen("It's Draw");
+        }
+    }
 
-Ao ouvir um clique, essa função vai chamar a função de controle de flow passando o e.target como parametro.
+    //Public function return
+    return {makeMove, currentClass}
+})();
 
-Então, a função controle de flow vai decidir que quem é a vez e vai acionar o devido o jogador, ou seja,
-ela vai chamar o objeto do jogador criado a partir da factory function e vai executar algum método
-que vai fazer a jogada com o valor certo ("x" ou "o").
+const controlUI = (() =>{
+    const changeClass = ()=>{
+        const board = document.querySelector('#board');
 
-Terceiro:
-Dúvidas: 
-  - Ainda tenho algumas dúvidas sobre como encaixar a função que impede que um jogador jogue no mesmo 
-    lugar de novo (acho que deve ir na função responsável pelo tabuleiro, que tem o eventlistener)]
+        if(xTurn){
+            board.classList.remove('o');
+            board.classList.add('x');
+        } else {
+            board.classList.remove('x');
+            board.classList.add('o');
+        }
+    };
 
-  - Também tenho dúvidas sobre como declarar o campeão.
-    Essa aqui eu vou esperar terminar o que eu tenho planejado pra depois pensar sobre.
-*/
+    const showEndScreen = (message)=>{
+        document.querySelector('.end-screen').style.display = 'flex';
+        document.querySelector('#result-message').textContent = `${message}`;
+    };
+
+    const igniteClassChange = ()=> changeClass();
+
+    return {igniteClassChange, showEndScreen};
+})();
+
+controlUI.igniteClassChange();
