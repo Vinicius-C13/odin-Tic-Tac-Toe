@@ -1,67 +1,82 @@
 "use strict";
 
-const Player = (sign) => {
+const Player = (signClass) => {
 
     const getSign = () => {
-        return sign;
+        return signClass;
     }
 
     return {getSign};
 };
 
+
+//Controls game board
 const gameBoard = (() => {
-    const board = ["", "", "", "", "", "", "", "", ""];
+    const board = [{}, {}, {}, {}, {}, {}, {}, {}, {}];
 
     const setField = (index, sign) => {
         if(index>board.length) return;
-        board[index] = sign;
+        board[index].name = sign;
     };
 
     const getField = (index, sign) => {
         if(index>board.length) return;
-        return board[index];;
+        return board[index];
     };
 
     const reset = () => {
         for(let i=0; i < board.length; i++) {
-            board[i] = "";
+            delete board[i].name;
         }
     };
 
     return { setField, getField, reset}
 })();
 
+//Controls UI
 const displayController = (() => {
     const cellElements = document.querySelectorAll('.cell');
+    const classNames = ['x-class', 'o-class'];
+    const endScreen = document.querySelector('#end-screen');
     const resultMessage = document.querySelector('#result-message');
     const resetButton = document.querySelector('#reset-button');
 
     cellElements.forEach((cell) => 
         cell.addEventListener('click', (e) => {
-            if(gameController.getIsOver() || e.target.textContent !== "") return;
+            if(gameController.getIsOver() || 
+               classNames.some(className => e.target.classList.contains(className))
+              ) return;
             gameController.playRound(parseInt(e.target.dataset.index));
             updateGameBoard();
-            console.log('foi');
+            console.log('foi'); //Retirar
         })
     );
 
     resetButton.addEventListener('click', e => {
         gameBoard.reset();
         gameController.reset();
-        updateGameBoard();
+        reset();
     });
 
     const updateGameBoard = () => {
         for(let i = 0; i < cellElements.length; i++){
-            cellElements[i].textContent = gameBoard.getField(i);
-        }
-    } 
+            cellElements[i].classList.add(gameBoard.getField(i).name);
+        };
+    };
+
+    const reset = () => {
+        for(let i = 0; i < cellElements.length; i++){
+            cellElements[i].classList.remove('x-class', 'o-class');
+        };
+    };
 
     const setResultMessage = (result)=>{
         if(result === "draw") {
-            setMessageElement("It's a draw!")
+            setMessageElement("It's a draw!");
+            console.log("It's a draw!");
         } else {
-            setMessageElement(`Player ${result} has won!`)
+            setMessageElement(`Player ${result} has won!`);
+            console.log(`Player ${result} has Won!`);
         }
     }
 
@@ -69,25 +84,33 @@ const displayController = (() => {
         resultMessage.textContent = message;
     };
 
-    return { setResultMessage}
+    const showEndScreen = (show) => {
+        if(show) {
+            endScreen.style.display = 'flex';
+        } else {endScreen.style.display = 'none';}
+    };
+
+    return { setResultMessage, showEndScreen}
 })();
 
+//Constrols game flow
 const gameController = (() => {
-    const PlayerX = Player("X");
-    const PlayerO = Player("O");
+    const PlayerX = Player("x-class");
+    const PlayerO = Player("o-class");
     let round = 1;
     let isOver = false;
 
     const playRound = (fieldIndex) => {
         gameBoard.setField(fieldIndex, getCurrentPlayerSign());
         if (checkWinner(fieldIndex)) {
-            displayController.setResultMessage(getCurrentPlayerSign());
-            console.log(`Player ${getCurrentPlayerSign()} wins!`);
+            displayController.setResultMessage(getCurrentPlayerSign() === 'x-class' ? 'X':'O');
+            displayController.showEndScreen(true);
             isOver = true;
             return;
         }
         if (round === 9) {
             displayController.setResultMessage("draw");
+            displayController.showEndScreen(true);
             isOver = true;
             return;
         }
@@ -113,7 +136,7 @@ const gameController = (() => {
         return winConditions.filter((combination) => combination.includes(fieldIndex))
         .some((possibleCombination) =>
           possibleCombination.every(
-            (index) => gameBoard.getField(index) === getCurrentPlayerSign()
+            (index) => gameBoard.getField(index).name === getCurrentPlayerSign()
           )
         );
     }
@@ -125,6 +148,7 @@ const gameController = (() => {
     const reset = () => {
         round = 1;
         isOver = false;
+        displayController.showEndScreen(false)
     };
 
     return { playRound, getIsOver, reset }
