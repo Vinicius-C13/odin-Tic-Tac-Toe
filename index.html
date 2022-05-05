@@ -10,10 +10,17 @@
     <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="end-screen"><div><p id="result-message"></p><button id="reset-button">Restart</button></div></div>
+    <div id="end-screen">
+        <div>
+            <p id="result-message"></p>
+            <button id="reset-button">Restart</button>
+        </div>
+    </div>
+
     <header>
         <h1>Tic-Tac-Toe</h1>
     </header>
+
     <main>
         <div class="board" id="board">
             <div class="cell" data-index="0"></div>
@@ -27,6 +34,7 @@
             <div class="cell" data-index="8"></div>
         </div>
     </main>
+    
     <footer>
         <p>Copyright © 2022 Vinicius Costa</p>
     </footer>
